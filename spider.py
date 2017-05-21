@@ -38,12 +38,16 @@ def main(html):
         souptemp = BeautifulSoup(htmltemp)
 
         # init the var
-        buyName = 'NULL'
-        publishDate = 'NULL'
-        dealDate = 'NULL'
-        buyWay = 'NULL'
-        companyName = 'NULL'
-        money = 'NULL'
+        buyName = 'NULL'             # 项目名称
+        publishDate = 'NULL'         # 发布日期
+        dealDate = 'NULL'            # 开标日期
+        buyWay = 'NULL'              # 采购方式
+        companyName = 'NULL'         # 供应商名称
+        money = 'NULL'               # 中标金额
+
+        # new
+        companyAddress = 'NULL'      # 供应商地址
+        buyProxy = 'NULL'            # 采购代理机构
 
         # locate to td
         taglist = souptemp.select('td[class="title02"]')
@@ -52,26 +56,38 @@ def main(html):
             for tdtag in taglist:
 
                 if tdtag.string == u'中标情况':
-                    curtag = tdtag.nextSibling.nextSibling
+                    curtag = tdtag.nextSibling.nextSibling   # 定位到右边的td
 
                     ptags = curtag.select('p')
                     for ptag in ptags:
-                        if ptag.get_text().find(u'一、') >= 0:
+                        if ptag.get_text().find(u'项目名称') >= 0:
                             buyName = ptag.get_text()[ptag.get_text().find(u'：')+1 : len(ptag.get_text()) ]
-                        if ptag.get_text().find(u'三、') >= 0:
+                        if ptag.get_text().find(u'发布日期') >= 0:
                             publishDate = ptag.get_text()[ptag.get_text().find(u'：')+1 : len(ptag.get_text()) ]
-                        if ptag.get_text().find(u'四、') >= 0:
+                        if ptag.get_text().find(u'开标日期') >= 0:
                             dealDate = ptag.get_text()[ptag.get_text().find(u'：')+1 : len(ptag.get_text()) ]
-                        if ptag.get_text().find(u'五、') >= 0:
+                        if ptag.get_text().find(u'采购方式') >= 0:
                             buyWay = ptag.get_text()[ptag.get_text().find(u'：')+1 : len(ptag.get_text()) ]
+                        if ptag.get_text().find(u'代理机构') >= 0:
+                            buyProxy = ptag.get_text()[ptag.get_text().find(u'：')+1 : len(ptag.get_text()) ]
 
-                    companyName = curtag.select('td')[7].get_text()
-                    money = curtag.select('td')[9].get_text()
+                    # ca!!!
+                    indextags = curtag.select('tr')[0].select('td')
+
+                    index = 0
+                    while (index < len(indextags)):
+                        if indextags[index].get_text().find(u'名称') >= 0:
+                            companyName = curtag.select('tr')[1].select('td')[index].get_text()
+                        if indextags[index].get_text().find(u'金额') >= 0:
+                            money = curtag.select('tr')[1].select('td')[index].get_text()
+                        if indextags[index].get_text().find(u'地址') >= 0:
+                            companyAddress = curtag.select('tr')[1].select('td')[index].get_text()
+                        index = index + 1
 
         except Exception:
             pass
 
-        
+
 
         # print (u'采购项目名称: %s'%(buyName))
         # print (u'招标公告发布日期: %s'%(publishDate))
@@ -89,14 +105,16 @@ def main(html):
         fout.write(u"开标日期: " + dealDate + "\n")
         fout.write(u"采购方式: " + buyWay + "\n")
         fout.write(u"供应商名称: " + companyName + "\n")
+        fout.write(u"代理机构: " + buyProxy + "\n")
+        fout.write(u"供应商地址: " + companyAddress + "\n")
         fout.write(u"中标金额: " + money + "\n---------------------------\n")
 
     fout.close()
 
 if __name__ == '__main__':
     i = 1
-    while i < 2820:
-        url='http://cgb.yantai.gov.cn/module/jslib/jquery/jpage/dataproxy.jsp?startrecord=' + str(i) + '&endrecord='+ str((i+149) > 2829 and 2819 or (i+149)) + '&perpage=50'
+    while i < 2901:
+        url='http://cgb.yantai.gov.cn/module/jslib/jquery/jpage/dataproxy.jsp?startrecord=' + str(i) + '&endrecord='+ str((i+149) > 2901 and 2901 or (i+149)) + '&perpage=50'
         values={'col':'1', 'appid':'1', 'webid':'89', 'path':'/', 'columnid':'5805', 'sourceContentType':'3', 'unitid':'8995', 'webname':'烟台市政府采购网', 'permissiontype':'0'}
 
         # print url
